@@ -10,16 +10,29 @@ import (
 )
 
 func branchesCmd(c *cli.Context) error {
+	isDeleting := c.Bool("d")
+
 	var options []selectPrompt.Option
 	for _, branch := range git.Branches() {
 		var option = selectPrompt.Option{Text: branch.Name, Value: branch.Name, Selected: branch.Currect}
 		options = append(options, option)
 	}
-	options = append(options, selectPrompt.Option{Text: "Create new branch", Custom: true})
+
+	if !isDeleting {
+		options = append(options, selectPrompt.Option{Text: "Create new branch", Custom: true})
+	}
 
 	selectedOption := selectPrompt.Init(options)
 
-	if selectedOption.Custom {
+	if isDeleting {
+		branch := selectedOption.Value
+		command := append(git.DeleteBranch, branch)
+		_, err := git.RunInlineCommand(command...)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Deleted branch %q \n", branch)
+	} else if selectedOption.Custom {
 		branch := textPrompt.Init("Please enter a name for your branch:")
 		command := append(git.CheckoutNewBranch, branch)
 		_, err := git.RunInlineCommand(command...)
@@ -50,7 +63,6 @@ func main() {
 			Name:        "branches",
 			Aliases:     []string{"br"},
 			Usage:       "manage branches",
-			ArgsUsage:   "[D]",
 			Description: "create/delete/checkout branches",
 			Flags: []cli.Flag{
 				cli.BoolFlag{

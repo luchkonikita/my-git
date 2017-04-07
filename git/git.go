@@ -13,6 +13,9 @@ var CheckoutNewBranch = []string{"checkout", "-b"}
 // CheckoutBranch - does `git checkout {branch name}`
 var CheckoutBranch = []string{"checkout"}
 
+// DeleteBranch - does `git branch -D {branch name}`
+var DeleteBranch = []string{"branch", "-D"}
+
 // Branch - a struct with branch name and `current` flag.
 type Branch struct {
 	Name    string
